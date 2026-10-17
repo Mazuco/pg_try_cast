@@ -1,6 +1,6 @@
 # pg_try_cast
 
-[![CI](https://github.com/Mazuco/pg_try_cast/actions/workflows/ci.yml/badge.svg)](https://github.com/SEU-USUARIO/pg_try_cast/actions/workflows/ci.yml)
+[![CI](https://github.com/Mazuco/pg_try_cast/actions/workflows/ci.yml/badge.svg)](https://github.com/Mazuco/pg_try_cast/actions/workflows/ci.yml)
 ![PostgreSQL 16+](https://img.shields.io/badge/PostgreSQL-16%2B-336791?logo=postgresql&logoColor=white)
 [![License: PostgreSQL](https://img.shields.io/badge/license-PostgreSQL-blue.svg)](LICENSE)
 

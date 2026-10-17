@@ -1,0 +1,127 @@
+-- try_cast across many kinds of data types
+\pset null '(null)'
+-- booleans, uuid, network
+SELECT try_cast('yes', NULL::boolean), try_cast('talvez', NULL::boolean);
+ try_cast | try_cast 
+----------+----------
+ t        | (null)
+(1 row)
+
+SELECT try_cast('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', NULL::uuid), try_cast('123', NULL::uuid);
+               try_cast               | try_cast 
+--------------------------------------+----------
+ a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11 | (null)
+(1 row)
+
+SELECT try_cast('192.168.0.1', NULL::inet), try_cast('999.1.1.1', NULL::inet);
+  try_cast   | try_cast 
+-------------+----------
+ 192.168.0.1 | (null)
+(1 row)
+
+-- date/time
+SELECT try_cast('10:30', NULL::time), try_cast('25:00', NULL::time);
+ try_cast | try_cast 
+----------+----------
+ 10:30:00 | (null)
+(1 row)
+
+SELECT try_cast('1 day 2 hours', NULL::interval), try_cast('one day', NULL::interval);
+    try_cast     | try_cast 
+-----------------+----------
+ @ 1 day 2 hours | (null)
+(1 row)
+
+-- json
+SELECT try_cast('{"a": 1}', NULL::jsonb), try_cast('{"a":', NULL::jsonb);
+ try_cast | try_cast 
+----------+----------
+ {"a": 1} | (null)
+(1 row)
+
+SELECT try_cast('[1,2', NULL::json);
+ try_cast 
+----------
+ (null)
+(1 row)
+
+-- arrays and ranges
+SELECT try_cast('{1,2,3}', NULL::int[]), try_cast('{1,2,x}', NULL::int[]);
+ try_cast | try_cast 
+----------+----------
+ {1,2,3}  | (null)
+(1 row)
+
+SELECT try_cast('[1,10)', NULL::int4range), try_cast('[10,1)', NULL::int4range);
+ try_cast | try_cast 
+----------+----------
+ [1,10)   | (null)
+(1 row)
+
+-- type modifiers follow column / COPY rules
+SELECT try_cast('abc', NULL::varchar(3)), try_cast('abcd', NULL::varchar(3));
+ try_cast | try_cast 
+----------+----------
+ abc      | (null)
+(1 row)
+
+SELECT try_cast('ab', NULL::char(2)), try_cast('abc', NULL::char(2));
+ try_cast | try_cast 
+----------+----------
+ ab       | (null)
+(1 row)
+
+SELECT try_cast('123.456', NULL::numeric(5,2)), try_cast('12345.6', NULL::numeric(5,2));
+ try_cast | try_cast 
+----------+----------
+   123.46 |   (null)
+(1 row)
+
+-- typmod taken from the fallback expression
+SELECT try_cast(v, 'N/A'::varchar(4)) FROM (VALUES ('BR'), ('BRASIL')) t(v);
+ try_cast 
+----------
+ BR
+ N/A
+(2 rows)
+
+-- domains: CHECK constraints are honoured
+CREATE DOMAIN positive_int AS int CHECK (VALUE > 0);
+SELECT try_cast('5', NULL::positive_int), try_cast('-5', NULL::positive_int), try_cast('x', NULL::positive_int);
+ try_cast | try_cast | try_cast 
+----------+----------+----------
+        5 |   (null) |   (null)
+(1 row)
+
+-- enums
+CREATE TYPE mood AS ENUM ('happy', 'sad');
+SELECT try_cast('happy', NULL::mood), try_cast('angry', NULL::mood);
+ try_cast | try_cast 
+----------+----------
+ happy    | (null)
+(1 row)
+
+-- composite types
+CREATE TYPE pair AS (a int, b text);
+SELECT try_cast('(1,abc)', NULL::pair), try_cast('(x,abc)', NULL::pair);
+ try_cast | try_cast 
+----------+----------
+ (1,abc)  | (null)
+(1 row)
+
+-- object identifiers
+SELECT try_cast('pg_class', NULL::regclass), try_cast('no_such_table', NULL::regclass);
+ try_cast | try_cast 
+----------+----------
+ pg_class | (null)
+(1 row)
+
+-- one call site, many rows, different outcomes (exercises the cache)
+SELECT count(*) FILTER (WHERE x IS NULL) AS invalid, count(x) AS valid
+FROM (SELECT try_cast(CASE WHEN g % 3 = 0 THEN 'x' ELSE g::text END, NULL::int) x
+      FROM generate_series(1, 3000) g) s;
+ invalid | valid 
+---------+-------
+    1000 |  2000
+(1 row)
+

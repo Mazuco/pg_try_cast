@@ -1,0 +1,53 @@
+-- try_convert(fallback anyelement, value text): SQL Server argument order
+\pset null '(null)'
+SELECT try_convert(NULL::int, '42');
+ try_convert 
+-------------
+          42
+(1 row)
+
+SELECT try_convert(NULL::int, 'abc');
+ try_convert 
+-------------
+      (null)
+(1 row)
+
+SELECT try_convert(0, 'abc');
+ try_convert 
+-------------
+           0
+(1 row)
+
+SELECT try_convert(NULL::numeric, '1.5');
+ try_convert 
+-------------
+         1.5
+(1 row)
+
+SELECT try_convert(NULL::timestamp, '2026-10-17 10:30:00');
+       try_convert        
+--------------------------
+ Sat Oct 17 10:30:00 2026
+(1 row)
+
+SELECT try_convert(NULL::timestamp, '2026-10-17 25:30:00');
+ try_convert 
+-------------
+ (null)
+(1 row)
+
+SELECT try_convert(0, NULL);
+ try_convert 
+-------------
+      (null)
+(1 row)
+
+-- same answer as try_cast
+SELECT try_convert(NULL::uuid, v) IS NOT DISTINCT FROM try_cast(v, NULL::uuid) AS same
+FROM (VALUES ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11'), ('nope')) t(v);
+ same 
+------
+ t
+ t
+(2 rows)
+

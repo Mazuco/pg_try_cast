@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    name: PostgreSQL ${{ matrix.pg }}
+    runs-on: ubuntu-latest
+    container: pgxn/pgxn-tools
+    strategy:
+      fail-fast: false
+      matrix:
+        pg: [16, 17, 18]
+    steps:
+      - name: Start PostgreSQL ${{ matrix.pg }}
+        run: pg-start ${{ matrix.pg }}
+      - name: Check out the code
+        uses: actions/checkout@v5
+      - name: Build and run the regression tests
+        run: pg-build-test
+
+  docker:
+    name: Docker image
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Build the image
+        run: docker build -t pg_try_cast .
+      - name: Smoke test
+        run: |
+          docker run -d --name pg -e POSTGRES_PASSWORD=postgres pg_try_cast
+          for i in $(seq 1 30); do
+            if docker exec pg psql -U postgres -h localhost -v ON_ERROR_STOP=1 \
+                 -c "CREATE EXTENSION IF NOT EXISTS pg_try_cast" \
+                 -c "SELECT try_cast('abc', 0) = 0 AND try_cast('42', 0) = 42 AS ok" ; then
+              exit 0
+            fi
+            sleep 2
+          done
+          docker logs pg
+          exit 1

@@ -1,0 +1,140 @@
+-- Basic behaviour of try_cast(value text, fallback anyelement)
+CREATE EXTENSION pg_try_cast;
+\pset null '(null)'
+-- valid input is converted
+SELECT try_cast('42', NULL::int);
+ try_cast 
+----------
+       42
+(1 row)
+
+SELECT try_cast('  42  ', NULL::int);
+ try_cast 
+----------
+       42
+(1 row)
+
+SELECT try_cast('-7', NULL::bigint);
+ try_cast 
+----------
+       -7
+(1 row)
+
+SELECT try_cast('3.14', NULL::numeric);
+ try_cast 
+----------
+     3.14
+(1 row)
+
+SELECT try_cast('2026-10-17', NULL::date);
+  try_cast  
+------------
+ 10-17-2026
+(1 row)
+
+-- invalid input returns NULL instead of an error
+SELECT try_cast('abc', NULL::int);
+ try_cast 
+----------
+   (null)
+(1 row)
+
+SELECT try_cast('', NULL::int);
+ try_cast 
+----------
+   (null)
+(1 row)
+
+SELECT try_cast('4.5', NULL::int);
+ try_cast 
+----------
+   (null)
+(1 row)
+
+SELECT try_cast('2026-02-30', NULL::date);
+ try_cast 
+----------
+ (null)
+(1 row)
+
+-- out-of-range values also return NULL
+SELECT try_cast('99999999999', NULL::int);
+ try_cast 
+----------
+   (null)
+(1 row)
+
+SELECT try_cast('40000', NULL::smallint);
+ try_cast 
+----------
+   (null)
+(1 row)
+
+-- a non-NULL fallback is returned on failure
+SELECT try_cast('abc', 0);
+ try_cast 
+----------
+        0
+(1 row)
+
+SELECT try_cast('abc', -1::bigint);
+ try_cast 
+----------
+       -1
+(1 row)
+
+SELECT try_cast('not a date', DATE '1900-01-01');
+  try_cast  
+------------
+ 01-01-1900
+(1 row)
+
+SELECT try_cast('42', 0);
+ try_cast 
+----------
+       42
+(1 row)
+
+-- NULL input stays NULL, even with a fallback (same as CAST(NULL AS ...))
+SELECT try_cast(NULL, 0);
+ try_cast 
+----------
+   (null)
+(1 row)
+
+SELECT try_cast(NULL::text, NULL::int);
+ try_cast 
+----------
+   (null)
+(1 row)
+
+-- works on table data, row by row
+CREATE TEMP TABLE raw_data (id int, v text);
+INSERT INTO raw_data VALUES (1, '10'), (2, 'dez'), (3, NULL), (4, '30'), (5, '1e3');
+SELECT id, v, try_cast(v, NULL::int) AS as_int, try_cast(v, NULL::numeric) AS as_num
+FROM raw_data ORDER BY id;
+ id |   v    | as_int | as_num 
+----+--------+--------+--------
+  1 | 10     |     10 |     10
+  2 | dez    | (null) | (null)
+  3 | (null) | (null) | (null)
+  4 | 30     |     30 |     30
+  5 | 1e3    | (null) |   1000
+(5 rows)
+
+SELECT sum(try_cast(v, 0)) FROM raw_data;
+ sum 
+-----
+  40
+(1 row)
+
+-- varchar / text values are accepted as input
+SELECT try_cast('123'::varchar, NULL::int);
+ try_cast 
+----------
+      123
+(1 row)
+
+-- the fallback type must be known
+SELECT try_cast('1', NULL);
+ERROR:  could not determine polymorphic type because input has type unknown

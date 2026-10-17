@@ -1,0 +1,17 @@
+# build output
+*.o
+*.so
+*.bc
+*.dylib
+*.dll
+
+# regression test output
+test/results/
+test/regression.diffs
+test/regression.out
+results/
+regression.diffs
+regression.out
+
+# PGXN bundle
+*.zip

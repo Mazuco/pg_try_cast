@@ -1,0 +1,6 @@
+# pg_try_cast extension
+comment = 'TRY_CAST / TRY_CONVERT: convert values without raising errors'
+default_version = '1.0'
+module_pathname = '$libdir/pg_try_cast'
+relocatable = true
+trusted = true

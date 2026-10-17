@@ -1,0 +1,39 @@
+{
+   "name": "pg_try_cast",
+   "abstract": "TRY_CAST / TRY_CONVERT for PostgreSQL: convert values without raising errors",
+   "description": "Converts text to any PostgreSQL data type and returns NULL or a fallback value instead of raising an error when the conversion fails. Uses the soft-error input functions of PostgreSQL 16+, with no subtransactions.",
+   "version": "1.0.0",
+   "maintainer": "Vitor Mazuco",
+   "license": "postgresql",
+   "provides": {
+      "pg_try_cast": {
+         "abstract": "TRY_CAST / TRY_CONVERT for PostgreSQL",
+         "file": "pg_try_cast--1.0.sql",
+         "docfile": "README.md",
+         "version": "1.0.0"
+      }
+   },
+   "prereqs": {
+      "runtime": {
+         "requires": {
+            "PostgreSQL": "16.0.0"
+         }
+      }
+   },
+   "resources": {
+      "bugtracker": {
+         "web": "https://github.com/SEU-USUARIO/pg_try_cast/issues"
+      },
+      "repository": {
+         "url": "https://github.com/SEU-USUARIO/pg_try_cast.git",
+         "web": "https://github.com/SEU-USUARIO/pg_try_cast",
+         "type": "git"
+      }
+   },
+   "generated_by": "Vitor Mazuco",
+   "tags": ["try_cast", "try_convert", "cast", "conversion", "sql server", "data cleaning"],
+   "meta-spec": {
+      "version": "1.0.0",
+      "url": "https://pgxn.org/meta/spec.txt"
+   }
+}

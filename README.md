@@ -1,6 +1,6 @@
 # pg_try_cast
 
-[![CI](https://github.com/SEU-USUARIO/pg_try_cast/actions/workflows/ci.yml/badge.svg)](https://github.com/SEU-USUARIO/pg_try_cast/actions/workflows/ci.yml)
+[![CI](https://github.com/Mazuco/pg_try_cast/actions/workflows/ci.yml/badge.svg)](https://github.com/SEU-USUARIO/pg_try_cast/actions/workflows/ci.yml)
 ![PostgreSQL 16+](https://img.shields.io/badge/PostgreSQL-16%2B-336791?logo=postgresql&logoColor=white)
 [![License: PostgreSQL](https://img.shields.io/badge/license-PostgreSQL-blue.svg)](LICENSE)
 
@@ -90,7 +90,7 @@ Requires **PostgreSQL 16 or newer**, because it relies on the "soft error" input
 
 ```bash
 sudo apt install build-essential postgresql-server-dev-17   # use your PostgreSQL major version
-git clone https://github.com/SEU-USUARIO/pg_try_cast.git
+git clone https://github.com/Mazuco/pg_try_cast.git
 cd pg_try_cast
 make
 sudo make install
